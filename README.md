@@ -15,4 +15,17 @@ The following steps were taken to achieve this solution:
 2) Alter images using Augmentor
 3) Create datasets based on these augmented images
 4) Use DenseNet model
-5) Resulting accuracy and confusion matrix
+5) Results: Confusion Matrix and accuracy ~91%
+
+## Main References
+https://medium.com/analytics-vidhya/how-to-fetch-kaggle-datasets-into-google-colab-ea682569851a
+https://neptune.ai/blog/google-colab-dealing-with-files
+https://keras.io/examples/vision/image_classification_from_scratch/
+https://neptune.ai/blog/data-augmentation-in-python
+https://github.com/mdbloice/Augmentor
+https://augmentor.readthedocs.io/en/master/code.html
+https://keras.io/api/preprocessing/image/
+https://www.kaggle.com/mauricioasperti/cats-vs-dogs-image-classification/notebook
+https://www.pluralsight.com/guides/introduction-to-densenet-with-tensorflow
+https://keras.io/api/applications/densenet/
+https://keras.io/api/layers/core_layers/dense/
