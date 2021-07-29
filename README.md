@@ -11,8 +11,23 @@ This is an Image Classification solution using Colab notebooks for classifying v
 
 ## Running the solution
 The following steps were taken to achieve this solution:
-1) obtain kaggle zipped file of vegetable images and unzip them
+1) Obtain kaggle zipped file of vegetable images and unzip them
+- Selected Kaggle repo was “kritikseth/fruit-and-vegetable-image-recognition” due to its small size compared to a few others (unzipped in Colab with limited space)
+- Analysis of Kaggle images:
+    - Remove corrupted images (ie. that do not contain “JFIF” in header)
+    - 36 classes
+    - 100 images per class
+    - Manual cleaning required: Removed a few outliers (Apple earpods, Ginger women, Paprika anime, fruit smoothies)
+    - Images include an assortment of cartoon images, sliced or cooked vegetables, vegetable alone or grouped, fruit on tree, etc.
 2) Alter images using Augmentor
+- Different types of image augmentation exist:
+    - Tensorflow.keras.preprocessing.image's ImageDataGenerator
+    - GitHub: 
+      - Augmentor: focus on geometric
+      - ImgAug: run on multiple CPU cores
+      - Albumentations: attempts to cover all types of augmentation
+      - AutoAugment and DeepAugment: searches best augmentation policies
+
 3) Create datasets based on these augmented images
 4) Use DenseNet model
 5) Results: Confusion Matrix and accuracy ~91%
