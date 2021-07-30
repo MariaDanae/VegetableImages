@@ -182,7 +182,7 @@ import seaborn as sns
 from sklearn.metrics import confusion_matrix
 
 y_pred = model.predict(test_dataset)
-y_test = np.concatenate([y for x, y in test_dataset], axis=1)
+y_test = np.concatenate([y for x, y in test_dataset], axis=0)
 
 cm = confusion_matrix(y_test, np.argmax(y_pred, axis=1))
 
