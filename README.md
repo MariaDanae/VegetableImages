@@ -185,26 +185,13 @@ history = model.fit(train_dataset,
                     validation_data=val_dataset)
 ```
 
-### Results: Confusion Matrix and accuracy ~91%
+### Results
+The accuracy for everything done above is an impressive ~91%!
 ```python
 loss_val, accuracy_val = model.evaluate(val_dataset)
 loss_test, accuracy_test = model.evaluate(test_dataset)
 ```
 
-```python
-import seaborn as sns
-from sklearn.metrics import confusion_matrix
-
-y_pred = model.predict(test_dataset)
-y_test = np.concatenate([y for x, y in test_dataset], axis=0)
-
-cm = confusion_matrix(y_test, np.argmax(y_pred, axis=1))
-
-plt.figure(figsize=(16, 16))
-ax = sns.heatmap(cm, cmap="YlGnBu", annot=True, 
-                 xticklabels=train_folder_names, 
-                 yticklabels=train_folder_names)
-```
 
 ## Main References
 https://medium.com/analytics-vidhya/how-to-fetch-kaggle-datasets-into-google-colab-ea682569851a
