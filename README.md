@@ -176,8 +176,8 @@ And finally we train our model using the following callbacks to help with accura
 - ModelCheckPoint: Takes a snapshot of the state of the system in case of failure.
 ```python
 reducelearningrate = ReduceLROnPlateau(monitor='val_accuracy', factor=0.5, patience=5, min_lr=1e-3)
-modelcheckpoint = ModelCheckpoint('modelsnapshot.h5', save_best_only=True)
 early_stopping = EarlyStopping(patience=3)
+modelcheckpoint = ModelCheckpoint('modelsnapshot.h5', save_best_only=True)
 
 history = model.fit(train_dataset,
                     epochs=50, 
