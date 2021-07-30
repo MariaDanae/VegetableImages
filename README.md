@@ -17,7 +17,7 @@ from google.colab import drive
 drive.mount('/content/gdrive')
 %cd /content/gdrive/My Drive/Kaggle
 ```
-### Create Image training, validation and test datasets from Kaggle
+### Obtain training and test datasets from Kaggle
 After looking through some kaggle datasets using `!kaggle datasets list -s vegetable`, the kaggle dataset choosen was `fruit-and-vegetable-image-recognition`. The reason being is that it was relatively small compared to some other datasets and everything is being done in GoogleDrive; meaning space is limited.
 
 ```python
@@ -58,17 +58,83 @@ print(f"Total {count} images")
 print(f"Removed {nb_removed} images")
 ```
 
-### Alter images using Augmentor
-- Different types of image augmentation exist:
-    - Tensorflow.keras.preprocessing.image's ImageDataGenerator
-    - GitHub: 
-      - Augmentor: focus on geometric
-      - ImgAug: run on multiple CPU cores
-      - Albumentations: attempts to cover all types of augmentation
-      - AutoAugment and DeepAugment: searches best augmentation policies
+### Increase number of images using Augmentor
+Different types of image augmentation exist beyond Tensorflow.keras.preprocessing.image's ImageDataGenerator. Here are some neat ones from GitHub:
+    - Augmentor: focus on geometric
+    - ImgAug: run on multiple CPU cores
+    - Albumentations: attempts to cover all types of augmentation
+    - AutoAugment and DeepAugment: searches best augmentation policies
+(Reference: https://neptune.ai/blog/data-augmentation-in-python)
+Augmentor was selected to be explored:
+    - https://github.com/mdbloice/Augmentor
+    - https://augmentor.readthedocs.io/en/master/userguide/mainfeatures.html
+To use Augmentor, we must first install it and then create our pipeline based off the training images saved in our directory
+```python
+!pip install Augmentor
+import Augmentor
+p = Augmentor.Pipeline(f"{DIR}/train")
+```
+Then we select the type of image changes and the propbability that an image will be distorted in that particular manner. The `sample` method aims at generating the specified number of images based on the types of distortions listed. Keep in mind that the `sample` method will create an `output` folder in the training folder so the amount of available space should be kept in mind when selecting the sample size. Also note that Augmentor takes a significant amount of time to run. My opinion is that considering that this only has to be done once since the output is saved and thus does not have to repeated for each training, this can be used in production as a one-time run if storage is large enough.
+```python
+p.rotate(probability=1.0, max_left_rotation=5, max_right_rotation=5)
+p.random_distortion(probability=0.4, grid_width=100, grid_height=100, magnitude=8)
+p.skew(probability=0.4)
+p.shear(probability=0.5, max_shear_left=2, max_shear_right=2)
+p.flip_left_right(probability=0.4)
 
-### Create datasets based on these augmented images
+p.sample(100000)
+```
+
+### Create Image training, validation and test sets
+The training and validation datasets will be based off of the augmented images that were saved in an output folder under training `{DIR}/train/output` with a validation split of 20%. The test set will simply be the test images from kaggle found in the test folder `{DIR}/test`. The `labels` will be "inferred" since they will be generated from the directory structure and the `label_mode` will be "int" since the labels are encoded as integers for sparse_categorical_crossentropy loss. The `image_size` and `batch_size` are kept to their default values and the `color_mode` will be set to "rgb" so that it's specified that 3 channels should be used as input.
+(Reference: https://keras.io/api/preprocessing/image/)
+
+```python
+seed = 40
+labels = 'inferred'
+label_mode = 'int'
+image_size = (256, 256)
+batch_size = 32
+channels = "rgb"
+val_split = 0.2
+
+train_dataset = tf.keras.preprocessing.image_dataset_from_directory(
+    directory=f"{DIR}/train/output",
+    validation_split=val_split,
+    subset="training",
+    seed=seed,
+    image_size=image_size,
+    batch_size=batch_size,
+    color_mode=channels,
+    labels=labels,
+    label_mode=label_mode,
+)
+val_dataset = tf.keras.preprocessing.image_dataset_from_directory(
+    directory=f"{DIR}/train/output",
+    validation_split=val_split,
+    subset="validation",
+    seed=seed,
+    image_size=image_size,
+    batch_size=batch_size,
+    color_mode=channels,
+    labels=labels,
+    label_mode=label_mode,
+)
+
+test_dataset = tf.keras.preprocessing.image_dataset_from_directory(
+    directory=f"{DIR}/test",
+    subset=None,
+    seed=seed,
+    image_size=image_size,
+    batch_size=batch_size,
+    color_mode=channels,
+    labels=labels,
+    label_mode=label_mode,
+)
+```
+
 ### Use DenseNet model
+https://www.pluralsight.com/guides/introduction-to-densenet-with-tensorflow
 ### Results: Confusion Matrix and accuracy ~91%
 
 ## Main References
