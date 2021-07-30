@@ -134,8 +134,9 @@ test_dataset = tf.keras.preprocessing.image_dataset_from_directory(
 ```
 
 ### Use DenseNet model
-https://www.pluralsight.com/guides/introduction-to-densenet-with-tensorflow
-
+DenseNet was chosen over ResNet since it's said to be more efficient on some image classification, although does take more memory, seeing that layers receives and concatenates the outputs of previous layers.
+The modeling algorith is largerly inspired by this "Introduction to DenseNet with TensorFlow" tutorial found here: https://www.pluralsight.com/guides/introduction-to-densenet-with-tensorflow. A few changes have been made but essentially after trying a large number of changes in parameters and structure, the following gave the best validation and test accuracies in the end.
+The algorithm starts with using the smallest DenseNet which is `DenseNet121`, whereby 121 defines the number of layers in this neural network (easily calculated 121 = 5 (convolution and pooling layer) + (6+12+24 (transition layers) +16 (classification layer) )  * 2 (each dense block has 2 layers: 1x1 and 3x3 conv)). The arguments passed to `DenseNet121` are `include_top` which is set to False to not "include a fully-connected layer at the top of the network", `weights` using pretrained weights from ImageNet, `input_shape` which is the image_size and color_mode (ie. "rgb" = 3 channels) defined earlier when creating our datasets from the directory, and `pooling` which is set to "avg" so that "global average pooling is applied to the output of the last convolutional block" of the model. (Reference: https://keras.io/api/applications/densenet/). Other than the BatchNormalization, Rescaling and Dropout helping with the accuracy, having two Dense layers before the final Dense layer with the number of classes we have was crucial with the accuracy (having both versus only one is a difference of ~8% in accuracy).
 ```python
 model_d=DenseNet121(include_top=False, weights="imagenet", input_shape=(256, 256, 3), pooling="avg")
 
@@ -153,6 +154,7 @@ pred = Dense(36, activation='softmax')(x)
 model = Model(inputs=model_d.input, outputs=pred)
 ```
 
+Another important detail that helped tremendously with the accuracy is ensuring that some layers are not to be trained on. This technique is done to avoid overfitting. The number `32` was discovered through trial and error testing.
 ```python
 for layer in model.layers[:-32]:
     layer.trainable=False
@@ -161,10 +163,22 @@ for layer in model.layers[-32:]:
     layer.trainable=True
 ```
 
-```
+We compile the model using Adam as our optimizer and sparse_categorical_crossentropy for our loss since one-hot-encoding was not used prior.
+```python
 model.compile(optimizer=keras.optimizers.Adam(1e-3),
               loss="sparse_categorical_crossentropy",
               metrics=["sparse_categorical_accuracy"])
+```
+
+And finally we train our model using the following callbacks to help with accuracy:
+- ReduceLROnPlateau: Reduces learning rate when the defined metric (in this case `val_accuracy`) has stopped improving.
+- EarlyStopping: Stops training when there is no more improvement to help with overfitting.
+- ModelCheckPoint: Takes a snapshot of the state of the system in case of failure.
+```python
+reducelearningrate = ReduceLROnPlateau(monitor='val_accuracy', factor=0.5, patience=5, min_lr=1e-3)
+modelcheckpoint = ModelCheckpoint('modelsnapshot.h5', save_best_only=True)
+early_stopping = EarlyStopping(patience=3)
+
 history = model.fit(train_dataset,
                     epochs=50, 
                     callbacks=[early_stopping, reducelearningrate, modelcheckpoint], 
@@ -202,5 +216,7 @@ https://augmentor.readthedocs.io/en/master/code.html
 https://keras.io/api/preprocessing/image/
 https://www.kaggle.com/mauricioasperti/cats-vs-dogs-image-classification/notebook
 https://www.pluralsight.com/guides/introduction-to-densenet-with-tensorflow
+https://towardsdatascience.com/review-densenet-image-classification-b6631a8ef803
+https://medium.com/@smallfishbigsea/densenet-2b0889854a92
 https://keras.io/api/applications/densenet/
 https://keras.io/api/layers/core_layers/dense/
