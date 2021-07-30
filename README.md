@@ -135,7 +135,62 @@ test_dataset = tf.keras.preprocessing.image_dataset_from_directory(
 
 ### Use DenseNet model
 https://www.pluralsight.com/guides/introduction-to-densenet-with-tensorflow
+
+```python
+model_d=DenseNet121(include_top=False, weights="imagenet", input_shape=(256, 256, 3), pooling="avg")
+
+x = model_d.output
+x = layers.experimental.preprocessing.Rescaling(1./255)(x)
+x = BatchNormalization()(x)
+x = Dropout(0.5)(x)
+x = Dense(1024,activation='relu')(x)
+x = Dense(512,activation='relu')(x)
+x = BatchNormalization()(x)
+x = Dropout(0.5)(x)
+
+pred = Dense(36, activation='softmax')(x)
+
+model = Model(inputs=model_d.input, outputs=pred)
+```
+
+```python
+for layer in model.layers[:-32]:
+    layer.trainable=False
+    
+for layer in model.layers[-32:]:
+    layer.trainable=True
+```
+
+```
+model.compile(optimizer=keras.optimizers.Adam(1e-3),
+              loss="sparse_categorical_crossentropy",
+              metrics=["sparse_categorical_accuracy"])
+history = model.fit(train_dataset,
+                    epochs=50, 
+                    callbacks=[early_stopping, reducelearningrate, modelcheckpoint], 
+                    validation_data=val_dataset)
+```
+
 ### Results: Confusion Matrix and accuracy ~91%
+```python
+loss_val, accuracy_val = model.evaluate(val_dataset)
+loss_test, accuracy_test = model.evaluate(test_dataset)
+```
+
+```python
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
+
+y_pred = model.predict(test_dataset)
+y_test = np.concatenate([y for x, y in test_dataset], axis=1)
+
+cm = confusion_matrix(y_test, np.argmax(y_pred, axis=1))
+
+plt.figure(figsize=(16, 16))
+ax = sns.heatmap(cm, cmap="YlGnBu", annot=True, 
+                 xticklabels=train_folder_names, 
+                 yticklabels=train_folder_names)
+```
 
 ## Main References
 https://medium.com/analytics-vidhya/how-to-fetch-kaggle-datasets-into-google-colab-ea682569851a
