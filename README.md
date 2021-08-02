@@ -74,7 +74,7 @@ To use Augmentor, we must first install it and then create our pipeline based of
 import Augmentor
 p = Augmentor.Pipeline(f"{DIR}/train")
 ```
-Then we select the type of image changes and the propbability that an image will be distorted in that particular manner. The `sample` method aims at generating the specified number of images based on the types of distortions listed. Keep in mind that the `sample` method will create an `output` folder in the training folder so the amount of available space should be kept in mind when selecting the sample size. Also note that Augmentor takes a significant amount of time to run. My opinion is that considering that this only has to be done once since the output is saved and thus does not have to repeated for each training, this can be used in production as a one-time run if storage is large enough.
+Then we select the type of image changes and the propbability that an image will be distorted in that particular manner. The `sample` method aims at generating the specified number of images based on the types of distortions listed. Keep in mind that the `sample` method will create an `output` folder in the training folder so the amount of available space should be kept in mind when selecting the sample size. Also note that Augmentor takes a significant amount of time to run. 
 ```python
 p.rotate(probability=1.0, max_left_rotation=5, max_right_rotation=5)
 p.random_distortion(probability=0.4, grid_width=100, grid_height=100, magnitude=8)
