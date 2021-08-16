@@ -1,7 +1,7 @@
 # Implementation of Augmentor and DenseNet on Vegetable Images
 
 ## Overview
-This is an Image Classification solution using Colab notebooks for classifying vegetable images. These images were taken from Kaggle `kritikseth/fruit-and-vegetable-image-recognition`, augmented using Augmentor `https://github.com/mdbloice/Augmentor` and modeled using DenseNet121. The accuracy of the validation set was ~89% and ~91% for the test set.
+This project was done for the McGill Neural Networks and Deep Learning - YCNG 229 course to learn how to implement deep learning models outside of what's regularly learned in class. This project is an Image Classification solution using Colab notebooks for classifying vegetable images. The images were taken from Kaggle `kritikseth/fruit-and-vegetable-image-recognition`. For learning purposes, the type of augmentation used is Augmentor `https://github.com/mdbloice/Augmentor` and the model used is DenseNet121. The accuracy of the validation set was ~89% and ~91% for the test set.
 
 ## Getting Started
 To run this solution, simply follow these steps:
